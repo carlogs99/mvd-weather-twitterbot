@@ -4,7 +4,7 @@ Twitter bot that uses OpenAI, Open-Meteo and Twitter APIs to make a daily tweets
 ### Twitter account:
 https://twitter.com/NubelGPT
 
-### OpenAI API Rerence:
+### OpenAI API Reference:
 https://platform.openai.com/docs/api-reference
 
 ### Open-Meteo API Reference:
