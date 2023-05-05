@@ -36,10 +36,23 @@ twitter_client = tweepy.Client(
 
 #########################################################################################################################
 
+weather_endpoint = "https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.19&daily=temperature_2m_max," \
+"temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,windspeed_10m_max," \
+"winddirection_10m_dominant&windspeed_unit=kn&timezone=America%2FSao_Paulo"
+
 # Request weather data from Open-Meteo API
-weather_response = requests.get("https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.19" \
-                        "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max," \
-                        "precipitation_sum,precipitation_probability_max&timezone=America%2FSao_Paulo")
+weather_response = requests.get(weather_endpoint)
+
+# Function to convert wind direction from degrees to cardinals
+def degrees_to_cardinal(d):
+    '''
+    Convert degrees to cardinal direction names
+    '''
+    dirs = ['Norte', 'Norte-noreste', 'Nor-noreste', 'Este-noreste', 'Este', 'Este-sureste', 'Sureste', 
+            'Sur-sureste', 'Sur', 'Sur-suroeste', 'Suroeste', 'Oeste-suroeste', 'Oeste', 'Oeste-noroeste', 
+            'Noroeste', 'Norte-noroeste']
+    ix = int((d + 11.25)/22.5)
+    return dirs[ix % 16]
 
 # If response is good then response data is formatted into a text prompt for GPT
 if weather_response.status_code == 200:
@@ -50,10 +63,12 @@ if weather_response.status_code == 200:
     uv_max = weather_response.json()["daily"]["uv_index_max"][0]
     sunrise = datetime.datetime.fromisoformat(weather_response.json()["daily"]["sunrise"][0])
     sunset = datetime.datetime.fromisoformat(weather_response.json()["daily"]["sunset"][0])
+    wind_max = weather_response.json()["daily"]["windspeed_10m_max"][0]
+    wind_dir = degrees_to_cardinal(weather_response.json()["daily"]["winddirection_10m_dominant"][0])
     # Content for GPT completion request:
     daily_forecast = f"max. temp = {max_temp} celsius, min. temp = {min_temp} celsius, sunrise time = {sunrise}," \
     f" sunset time = {sunset}, total rainfall = {rain_sum} millimeters, max. rain probability = {rain_prob_max}," \
-    f" max. uv index = {uv_max}."
+    f" max. uv index = {uv_max}, max wind = {wind_max} knots, dominant wind direction = {wind_dir}."
 else:
     raise ValueError("Incorrect response from Open-Meteo.")
 
@@ -67,7 +82,7 @@ completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[
       {"role": "system", "content": "You are a uruguayan meteorologist. " \
-       "Write a short tweet in rioplatense spanish about weather forecast for the day in Montevideo with the data you are given."},
+       "You are given daily weather data and you write a daily tweet about it."},
       {"role": "user", "content": prompt}
     ]
   )
@@ -128,3 +143,4 @@ for i in range(50): # Rate limit for POST_2_tweets endpoint is 100, tries at max
         print("Tweet shortened!\n")
 
 #########################################################################################################################
+
