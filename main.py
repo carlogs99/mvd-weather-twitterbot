@@ -1,5 +1,3 @@
-#########################################################################################################################
-
 # Imports to handle API keys
 from dotenv import load_dotenv
 import os
@@ -15,6 +13,20 @@ import tweepy
 
 import datetime # Used for formatting date received from weather API
 import time # Used to wait between Twitter API requests
+
+#########################################################################################################################
+
+# Values to customize weather API info.
+# Latitude and longitude for Montevideo
+LATITUDE = "-34.90" 
+LONGITUDE = "-56.19"
+# Timezone can be any of the "tz database"
+TIMEZONE = "America%2FSao_Paulo"
+
+# The following can be modified to customize GPT model behaviour
+GPT_PROMPT = "Write an original tweet in rioplatense spanish about weather forecast for the day in Montevideo with " \
+"the following data: "
+GPT_ROLE = "You are a uruguayan meteorologist.You are given daily weather data and you write a daily tweet about it."
 
 #########################################################################################################################
 
@@ -36,9 +48,9 @@ twitter_client = tweepy.Client(
 
 #########################################################################################################################
 
-weather_endpoint = "https://api.open-meteo.com/v1/forecast?latitude=-34.90&longitude=-56.19&daily=temperature_2m_max," \
+weather_endpoint = f"https://api.open-meteo.com/v1/forecast?latitude={LATITUDE}&longitude={LONGITUDE}&daily=temperature_2m_max," \
 "temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,windspeed_10m_max," \
-"winddirection_10m_dominant&windspeed_unit=kn&timezone=America%2FSao_Paulo"
+f"winddirection_10m_dominant&windspeed_unit=kn&timezone={TIMEZONE}"
 
 # Request weather data from Open-Meteo API
 weather_response = requests.get(weather_endpoint)
@@ -74,15 +86,14 @@ else:
 
 #########################################################################################################################
 
-prompt = "Write a short tweet in rioplatense spanish about weather forecast for the day in Montevideo with " \
-"the following data: " + daily_forecast
+# Behaviour can be modified in prompt and also in "content" attribute for "system" below.
+prompt = GPT_PROMPT + daily_forecast
 
 # Requests completion from OpenAI API
 completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[
-      {"role": "system", "content": "You are a uruguayan meteorologist. " \
-       "You are given daily weather data and you write a daily tweet about it."},
+      {"role": "system", "content": GPT_ROLE},
       {"role": "user", "content": prompt}
     ]
   )
@@ -142,5 +153,4 @@ for i in range(50): # Rate limit for POST_2_tweets endpoint is 100, tries at max
         shortened = True
         print("Tweet shortened!\n")
 
-#########################################################################################################################
 
