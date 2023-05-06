@@ -1,6 +1,8 @@
 # mvd-weather-twitterbot
 **[Twitter bot](https://twitter.com/NubelGPT)** that uses OpenAI, Open-Meteo and Twitter APIs to make a daily tweets about the weather in Montevideo.
 
+You can easily customize the behaviour of the bot to suit your needs by modifying the `LATITUDE`, `LONGITUDE`, `TIMEZONE`, `GPT_PROMPT` and `GPT_ROLE` constants at the beginning of `main.py`. You can find a list of timezone codes [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+
 ### Requirements
 Requires installing the following libraries:
 - [openai](https://platform.openai.com/docs/libraries)
