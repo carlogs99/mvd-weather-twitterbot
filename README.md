@@ -9,6 +9,7 @@ Requires installing the following libraries:
 - [dotenv](https://pypi.org/project/python-dotenv/)
 
 For the script to work, you need to have a `.env` file in the same directory as `main.py`. In this file, you should have all the necessary API keys as follows:
+
     OPENAI_API_KEY="XXXXXXXXX"
     TWITTER_CONSUMER_KEY="XXXXXXXXX"
     TWITTER_CONSUMER_SECRET="XXXXXXXXX"
